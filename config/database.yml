@@ -87,18 +87,16 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: hookdebug_production
-    username: hookdebug
-    password: <%= ENV["HOOKDEBUG_DATABASE_PASSWORD"] %>
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
-    database: hookdebug_production_cache
+    database: hookdebug_app_cache
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: hookdebug_production_queue
+    database: hookdebug_app_queue
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: hookdebug_production_cable
+    database: hookdebug_app_cable
     migrations_paths: db/cable_migrate

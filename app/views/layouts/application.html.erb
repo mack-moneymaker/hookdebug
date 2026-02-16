@@ -7,7 +7,8 @@
   <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Test webhooks online. Generate unique URLs, inspect HTTP requests in real-time, replay requests, and debug your API integrations. Free webhook tester." %>">
   <%= csrf_meta_tags %>
   <%= csp_meta_tag %>
-  <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
   <%= action_cable_meta_tag %>

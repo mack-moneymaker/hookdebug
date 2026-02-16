@@ -1,4 +1,4 @@
-app = "hookdebug"
+app = "hookdebug-app"
 primary_region = "cdg"
 console_command = "/rails/bin/rails console"
 
