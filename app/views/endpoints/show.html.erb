@@ -1,0 +1,140 @@
+<% content_for(:title) { @endpoint.name.presence || "Endpoint #{@endpoint.token[0..7]}" } %>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <!-- Endpoint Info -->
+  <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h1 class="text-2xl font-bold text-white"><%= @endpoint.name.presence || "Webhook Endpoint" %></h1>
+      <div class="flex items-center gap-3">
+        <% if @endpoint.expires_at %>
+          <span class="text-xs text-gray-400">Expires: <%= @endpoint.expires_at.strftime("%b %d, %Y %H:%M UTC") %></span>
+        <% else %>
+          <span class="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-1 rounded">Permanent</span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="bg-gray-950 border border-gray-700 rounded-lg p-4 mb-4 flex items-center justify-between">
+      <code class="text-emerald-400 text-lg font-mono" id="webhook-url"><%= request.base_url %><%= @endpoint.webhook_url %></code>
+      <button onclick="navigator.clipboard.writeText(document.getElementById('webhook-url').textContent); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy', 1500)"
+              class="bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-sm cursor-pointer">Copy</button>
+    </div>
+
+    <!-- Response Config -->
+    <details class="mb-4">
+      <summary class="text-gray-400 hover:text-white cursor-pointer text-sm">⚙️ Response Configuration</summary>
+      <%= form_with url: endpoint_path(@endpoint.token), method: :patch, class: "mt-3 grid grid-cols-3 gap-3" do |f| %>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Status Code</label>
+          <%= f.number_field :response_status_code, value: @endpoint.response_status_code, class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 w-full text-sm" %>
+        </div>
+        <div>
+          <label class="text-xs text-gray-500 block mb-1">Content-Type</label>
+          <%= f.text_field :response_content_type, value: @endpoint.response_content_type, class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 w-full text-sm" %>
+        </div>
+        <div class="flex items-end">
+          <%= f.submit "Update", class: "bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm cursor-pointer" %>
+        </div>
+        <div class="col-span-3">
+          <label class="text-xs text-gray-500 block mb-1">Response Body</label>
+          <%= f.text_area :response_body, value: @endpoint.response_body, rows: 3, class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 w-full text-sm font-mono" %>
+        </div>
+      <% end %>
+    </details>
+
+    <% if logged_in? && @endpoint.user == current_user %>
+      <!-- Team Sharing -->
+      <details>
+        <summary class="text-gray-400 hover:text-white cursor-pointer text-sm">👥 Team Sharing</summary>
+        <div class="mt-3">
+          <% @endpoint.team_members.includes(:user).each do |member| %>
+            <div class="flex items-center justify-between py-1">
+              <span class="text-sm text-gray-300"><%= member.user.email %> (<%= member.role %>)</span>
+              <%= button_to "Remove", endpoint_team_member_path(@endpoint.token, member), method: :delete, class: "text-red-400 text-xs hover:text-red-300" %>
+            </div>
+          <% end %>
+          <%= form_with url: endpoint_team_members_path(@endpoint.token), class: "flex gap-2 mt-2" do |f| %>
+            <%= f.email_field :email, placeholder: "teammate@email.com", class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-1.5 text-sm flex-1" %>
+            <%= f.select :role, [["Viewer", "viewer"], ["Editor", "editor"]], {}, class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-1.5 text-sm" %>
+            <%= f.submit "Add", class: "bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded text-sm cursor-pointer" %>
+          <% end %>
+        </div>
+      </details>
+    <% end %>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-4">
+    <%= form_with url: endpoint_path(@endpoint.token), method: :get, class: "flex gap-2" do |f| %>
+      <%= f.search_field :q, value: params[:q], placeholder: "Search requests (method, body, headers, IP)...", class: "bg-gray-900 border border-gray-800 text-white rounded-lg px-4 py-2 flex-1 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" %>
+      <%= f.submit "Search", class: "bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm cursor-pointer" %>
+      <% if params[:q].present? %>
+        <%= link_to "Clear", endpoint_path(@endpoint.token), class: "bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-lg text-sm" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Requests List -->
+  <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+    <div class="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+      <h2 class="text-sm font-semibold text-gray-400">
+        Requests (<span id="request-count"><%= @requests.count %></span>)
+      </h2>
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+        <span class="text-xs text-gray-500">Live</span>
+      </div>
+    </div>
+
+    <div id="requests-list">
+      <% if @requests.any? %>
+        <% @requests.each do |req| %>
+          <%= render partial: "webhook_requests/request_row", locals: { request: req } %>
+        <% end %>
+      <% else %>
+        <div class="p-12 text-center text-gray-500" id="empty-state">
+          <div class="text-4xl mb-3">📡</div>
+          <p>Waiting for requests...</p>
+          <p class="text-sm mt-2">Send a request to your webhook URL to see it appear here in real-time.</p>
+          <div class="mt-4 bg-gray-950 rounded-lg p-3 inline-block text-left">
+            <code class="text-emerald-400 text-sm">curl -X POST <%= request.base_url %><%= @endpoint.webhook_url %> \<br>  -H "Content-Type: application/json" \<br>  -d '{"hello": "world"}'</code>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Action Cable real-time connection
+  document.addEventListener("DOMContentLoaded", function() {
+    if (typeof ActionCable === "undefined") return;
+
+    const cable = ActionCable.createConsumer();
+    cable.subscriptions.create(
+      { channel: "EndpointChannel", token: "<%= @endpoint.token %>" },
+      {
+        received(data) {
+          if (data.type === "new_request") {
+            const list = document.getElementById("requests-list");
+            const empty = document.getElementById("empty-state");
+            if (empty) empty.remove();
+
+            list.insertAdjacentHTML("afterbegin", data.html);
+
+            // Update count
+            const countEl = document.getElementById("request-count");
+            if (countEl) countEl.textContent = parseInt(countEl.textContent) + 1;
+
+            // Flash effect
+            const first = list.firstElementChild;
+            if (first) {
+              first.classList.add("bg-emerald-900/20");
+              setTimeout(() => first.classList.remove("bg-emerald-900/20"), 2000);
+            }
+          }
+        }
+      }
+    );
+  });
+</script>

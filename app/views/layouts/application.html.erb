@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= content_for?(:title) ? "#{yield(:title)} — HookDebug" : "HookDebug — Webhook Tester & API Debugger" %></title>
+  <meta name="description" content="<%= content_for?(:description) ? yield(:description) : "Test webhooks online. Generate unique URLs, inspect HTTP requests in real-time, replay requests, and debug your API integrations. Free webhook tester." %>">
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= javascript_include_tag "application", "data-turbo-track": "reload", defer: true %>
+  <%= action_cable_meta_tag %>
+</head>
+<body class="h-full text-gray-100">
+  <nav class="bg-gray-900 border-b border-gray-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center gap-6">
+          <%= link_to root_path, class: "text-xl font-bold text-emerald-400 hover:text-emerald-300" do %>
+            🪝 HookDebug
+          <% end %>
+          <%= link_to "Pricing", pricing_path, class: "text-gray-400 hover:text-white text-sm" %>
+        </div>
+        <div class="flex items-center gap-4">
+          <% if logged_in? %>
+            <%= link_to "My Endpoints", endpoints_path, class: "text-gray-400 hover:text-white text-sm" %>
+            <span class="text-gray-500 text-sm"><%= current_user.email %></span>
+            <%= button_to "Logout", logout_path, method: :delete, class: "text-gray-400 hover:text-white text-sm" %>
+          <% else %>
+            <%= link_to "Login", login_path, class: "text-gray-400 hover:text-white text-sm" %>
+            <%= link_to "Sign Up", signup_path, class: "bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded text-sm font-medium" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <% if flash[:notice] %>
+    <div class="bg-emerald-900/50 border border-emerald-700 text-emerald-200 px-4 py-2 text-sm text-center"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="bg-red-900/50 border border-red-700 text-red-200 px-4 py-2 text-sm text-center"><%= flash[:alert] %></div>
+  <% end %>
+
+  <main>
+    <%= yield %>
+  </main>
+
+  <footer class="bg-gray-900 border-t border-gray-800 mt-20 py-8">
+    <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+      <p>HookDebug — Free online webhook tester and API debugger</p>
+      <p class="mt-1">Test webhooks, debug HTTP requests, inspect payloads in real-time</p>
+    </div>
+  </footer>
+</body>
+</html>

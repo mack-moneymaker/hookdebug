@@ -1,0 +1,41 @@
+<% content_for(:title) { "My Endpoints" } %>
+
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-white">My Endpoints</h1>
+    <%= form_with url: endpoints_path, method: :post, class: "flex gap-2" do |f| %>
+      <%= f.text_field :name, placeholder: "Endpoint name...", class: "bg-gray-800 border border-gray-700 text-white rounded px-3 py-2 text-sm" %>
+      <%= f.submit "New Endpoint", class: "bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded text-sm cursor-pointer font-medium" %>
+    <% end %>
+  </div>
+
+  <% if @endpoints.any? %>
+    <div class="space-y-3">
+      <% @endpoints.each do |endpoint| %>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex items-center justify-between hover:border-gray-700 transition">
+          <div>
+            <div class="flex items-center gap-3">
+              <%= link_to endpoint_path(endpoint.token), class: "text-white font-semibold hover:text-emerald-400" do %>
+                <%= endpoint.name.presence || "Endpoint #{endpoint.token[0..7]}..." %>
+              <% end %>
+              <% if endpoint.permanent? %>
+                <span class="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Permanent</span>
+              <% else %>
+                <span class="text-xs text-gray-500">Expires <%= time_ago_in_words(endpoint.expires_at) %></span>
+              <% end %>
+            </div>
+            <code class="text-gray-500 text-sm font-mono mt-1 block"><%= endpoint.webhook_url %></code>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-gray-500 text-sm"><%= endpoint.webhook_requests.count %> requests</span>
+            <%= button_to "Delete", destroy_endpoint_path(endpoint.token), method: :delete, class: "text-red-400 hover:text-red-300 text-sm", data: { confirm: "Are you sure?" } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12 text-gray-500">
+      <p>No endpoints yet. Create one above!</p>
+    </div>
+  <% end %>
+</div>

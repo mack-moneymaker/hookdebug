@@ -1,0 +1,35 @@
+<% content_for(:title) { "Pricing" } %>
+
+<div class="max-w-4xl mx-auto px-4 py-16">
+  <h1 class="text-4xl font-bold text-white text-center mb-4">Simple Pricing</h1>
+  <p class="text-gray-400 text-center mb-12">Start free, upgrade when you need more.</p>
+
+  <div class="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-8">
+      <h2 class="text-2xl font-bold text-white mb-2">Free</h2>
+      <div class="text-4xl font-bold text-white mb-4">$0</div>
+      <ul class="space-y-3 text-gray-400 mb-8">
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Temporary URLs (48h expiry)</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Last 50 requests stored</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Real-time inspection</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Request replay</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> No signup required</li>
+      </ul>
+      <%= link_to "Get Started Free", root_path, class: "block text-center bg-gray-800 hover:bg-gray-700 text-white font-semibold px-6 py-3 rounded-lg transition" %>
+    </div>
+
+    <div class="bg-gray-900 border-2 border-emerald-500 rounded-xl p-8 relative">
+      <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
+      <h2 class="text-2xl font-bold text-white mb-2">Pro</h2>
+      <div class="text-4xl font-bold text-white mb-1">$12<span class="text-lg text-gray-400">/month</span></div>
+      <ul class="space-y-3 text-gray-400 mb-8 mt-4">
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Permanent URLs (never expire)</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Unlimited request history</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Custom response rules</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Team sharing</li>
+        <li class="flex items-center gap-2"><span class="text-emerald-400">✓</span> Priority support</li>
+      </ul>
+      <%= link_to "Sign Up for Pro", signup_path, class: "block text-center bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-3 rounded-lg transition" %>
+    </div>
+  </div>
+</div>
